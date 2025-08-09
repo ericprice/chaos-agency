@@ -1,0 +1,15 @@
+@use "breakpoint" as bp;
+
+// Project-level wrapper mixin so we can call `@include breakpoint(...)`
+// while delegating to breakpoint-sass' namespaced mixin
+@mixin breakpoint($args...) {
+  @include bp.breakpoint($args...) {
+    @content;
+  }
+}
+
+$s: max-width 480px;
+$m-down: max-width 1024px;
+$m: 481px 1024px;
+$m-up: min-width 481px;
+$l: min-width 1025px;

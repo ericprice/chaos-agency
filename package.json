@@ -1,0 +1,27 @@
+{
+  "name": "chaos-agency",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:scss && npm run build:site",
+    "build:site": "eleventy",
+    "build:scss": "sass src/scss/styles.scss public/styles.css --style=compressed --load-path=node_modules/breakpoint-sass/stylesheets",
+    "start": "concurrently \"npm:watch:scss\" \"npm:serve\"",
+    "serve": "eleventy --serve",
+    "dev": "concurrently \"npm:watch:scss\" \"npm:serve\"",
+    "watch": "eleventy --watch",
+    "watch:scss": "sass --watch src/scss/styles.scss public/styles.css --load-path=node_modules/breakpoint-sass/stylesheets --source-map"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.2",
+    "breakpoint-sass": "^3.0.0",
+    "concurrently": "^9.2.0",
+    "sass": "^1.90.0"
+  }
+}

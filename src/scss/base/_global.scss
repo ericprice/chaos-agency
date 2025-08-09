@@ -1,0 +1,73 @@
+@use "../utils/breakpoints" as *;
+$bg: #fff !default;
+$fg: #808080 !default;
+$green: #008700 !default;
+$purple: #7600ff !default;
+$black: #000 !default;
+$red: #d30000 !default;
+$blue: #0000e1 !default;
+$orange: #ffa600 !default;
+
+:root {
+  --bg: #{$bg};
+  --fg: #{$fg};
+  --green: #{$green};
+  --purple: #{$purple};
+  --black: #{$black};
+  --red: #{$red};
+  --blue: #{$blue};
+  --orange: #{$orange};
+  --gap: 1.2em;
+  --leading: 1.2em;
+}
+
+html {
+  font-size: 3.2vw;
+
+  @include breakpoint($m-up) {
+    font-size: 1.28vw;
+  }
+}
+
+body {
+  padding: .75em 2em;
+  font-family: "New Rail Alphabet", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: var(--leading);
+  font-feature-settings: "liga" 1;
+}
+
+a {
+  color: var(--fg);
+
+  &:hover {
+    color: var(--black);
+  }
+}
+
+.site-wrapper {
+  display: grid;
+  gap: 0 var(--gap);
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.site-header {
+  grid-column: span 1;
+
+  .site-header-title {
+    margin-bottom: var(--leading);
+  }
+}
+
+.main {
+  grid-column: span 8;
+  user-select: none;
+}
+
+.site-footer {
+  position: fixed;
+  bottom: .75em;
+  left: 2em;
+}
