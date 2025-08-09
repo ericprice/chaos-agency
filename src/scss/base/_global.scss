@@ -22,7 +22,7 @@ $orange: #ffa600 !default;
 }
 
 html {
-  font-size: 3.2vw;
+  font-size: 16px;
 
   @include breakpoint($m-up) {
     font-size: 1.28vw;
@@ -54,7 +54,11 @@ a {
 }
 
 .site-header {
-  grid-column: span 1;
+  grid-column: span 3;
+
+  @include breakpoint($m-up) {
+    grid-column: span 1;
+  }
 
   .site-header-title {
     margin-bottom: var(--leading);
@@ -62,8 +66,12 @@ a {
 }
 
 .main {
-  grid-column: span 8;
+  grid-column: span 6;
   user-select: none;
+
+  @include breakpoint($m-up) {
+    grid-column: span 8;
+  }
 }
 
 .site-footer {
