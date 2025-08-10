@@ -159,21 +159,35 @@
         applyBaseStyles(base);
       };
     },
-    4: function pulseScale(_shapesRoot, base){
+    4: function shakeRamp(_shapesRoot, base){
       applyBaseStyles(base);
-      let t = 0;
+      const state = base.map(b => ({
+        ...b,
+        phase: Math.random() * Math.PI * 2
+      }));
+      let startTime = performance.now();
       let rafId = 0;
+      function easeOutCubic(p){ return 1 - Math.pow(1 - p, 3); }
+      const freqHz = 12; // constant speed
+      const omega = 2 * Math.PI * freqHz;
+      const maxAmp = 0.05; // max horizontal distance in viewport fraction
       function tick(){
-        t += 0.02;
-        base.forEach((b, i) => {
-          const phase = t + i * 0.8;
-          const s = b.scale * (1.0 + Math.sin(phase) * 0.08);
-          b.node.style.transform = `translate(-50%, -50%) rotate(${b.rotate}deg) scale(${s})`;
+        const elapsed = (performance.now() - startTime) / 1000;
+        const p = Math.min(Math.max(elapsed / 20, 0), 1);
+        const amp = maxAmp * easeOutCubic(p);
+        state.forEach(s => {
+          const angle = s.phase + elapsed * omega;
+          const dx = amp * Math.sin(angle);
+          const left = Math.max(0.06, Math.min(0.94, s.left + dx));
+          s.node.style.left = (left * 100) + '%';
         });
         rafId = requestAnimationFrame(tick);
       }
+      function onClick(){ startTime = performance.now() + 5000; }
+      window.addEventListener('click', onClick, { passive: true });
       rafId = requestAnimationFrame(tick);
       return function teardown(){
+        window.removeEventListener('click', onClick);
         cancelAnimationFrame(rafId);
         applyBaseStyles(base);
       };
