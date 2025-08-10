@@ -76,7 +76,7 @@ img, picture, video, canvas, svg {
 }
 
 /* Forms */
-input, button, textarea, select {
+input, button, textarea {
   font: inherit;
 }
 
@@ -88,7 +88,7 @@ button {
   background: transparent;
 }
 
-input, textarea, select {
+input, textarea {
   margin: 0;
   padding: 0;
   -webkit-appearance: none;

@@ -158,6 +158,49 @@
         window.removeEventListener('touchmove', onPointerMove);
         applyBaseStyles(base);
       };
+    },
+    4: function pulseScale(_shapesRoot, base){
+      applyBaseStyles(base);
+      let t = 0;
+      let rafId = 0;
+      function tick(){
+        t += 0.02;
+        base.forEach((b, i) => {
+          const phase = t + i * 0.8;
+          const s = b.scale * (1.0 + Math.sin(phase) * 0.08);
+          b.node.style.transform = `translate(-50%, -50%) rotate(${b.rotate}deg) scale(${s})`;
+        });
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+      return function teardown(){
+        cancelAnimationFrame(rafId);
+        applyBaseStyles(base);
+      };
+    },
+    5: function orbit(_shapesRoot, base){
+      applyBaseStyles(base);
+      let t = 0;
+      let rafId = 0;
+      const radius = 0.03;
+      function tick(){
+        t += 0.01;
+        base.forEach((b, i) => {
+          const angle = t + i * (Math.PI / 3);
+          const left = b.left + Math.cos(angle) * radius * (0.7 + i * 0.1);
+          const top = b.top + Math.sin(angle) * radius * (0.7 + i * 0.1);
+          const rot = b.rotate + Math.sin(angle) * 10;
+          b.node.style.left = (left * 100) + '%';
+          b.node.style.top = (top * 100) + '%';
+          b.node.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${b.scale})`;
+        });
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+      return function teardown(){
+        cancelAnimationFrame(rafId);
+        applyBaseStyles(base);
+      };
     }
   };
 
@@ -218,16 +261,13 @@
 
     // Shape modes + toggle
     const toggle = document.getElementById('mode-toggle');
+    const select = toggle ? toggle.querySelector('#mode-select') : null;
     let activeTeardown = null;
     let shapesBase = null;
 
-    function setActiveButton(mode){
-      if (!toggle) return;
-      const buttons = Array.from(toggle.querySelectorAll('.mode-toggle-btn'));
-      buttons.forEach(btn => {
-        const isActive = Number(btn.getAttribute('data-mode')) === mode;
-        btn.setAttribute('aria-pressed', String(isActive));
-      });
+    function setSelectValue(mode){
+      if (!select) return;
+      select.value = String(mode);
     }
 
     function startMode(mode){
@@ -242,18 +282,14 @@
         applyBaseStyles(shapesBase);
       }
       activeTeardown = ModeControllers[mode](shapesRoot, shapesBase);
-      setActiveButton(mode);
+      setSelectValue(mode);
       try { localStorage.setItem('shapeMode', String(mode)); } catch(_){}
       document.documentElement.setAttribute('data-shape-mode', String(mode));
     }
 
-    if (toggle) {
-      toggle.addEventListener('click', (e) => {
-        const target = e.target;
-        if (!(target instanceof Element)) return;
-        const btn = target.closest('.mode-toggle-btn');
-        if (!btn) return;
-        const mode = Number(btn.getAttribute('data-mode')) || 1;
+    if (select) {
+      select.addEventListener('change', () => {
+        const mode = Number(select.value) || 1;
         startMode(mode);
       });
     }
@@ -261,6 +297,6 @@
     // Initialize default or persisted mode
     const initialMode = Number((() => { try { return localStorage.getItem('shapeMode'); } catch(_) { return null; } })()) || 1;
     if (shapesRoot) startMode(initialMode);
-    else setActiveButton(initialMode);
+    else setSelectValue(initialMode);
   });
 })();
