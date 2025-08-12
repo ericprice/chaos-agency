@@ -731,6 +731,187 @@
         shapesRoot.style.filter = 'none';
         applyBaseStyles(base);
       };
+    },
+    12: function tessellateGrow(_shapesRoot, base){
+      // Base static layout
+      applyBaseStyles(base);
+
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const entries = [];
+      const uid = Date.now().toString(36);
+
+      function parseViewBox(vb){
+        const parts = (vb || '').trim().split(/[,\s]+/).map(Number);
+        return {
+          minX: parts[0] || 0,
+          minY: parts[1] || 0,
+          width: parts[2] || 100,
+          height: parts[3] || 100
+        };
+      }
+
+      function ensureDefs(svg){
+        let defs = svg.querySelector('defs');
+        if (!defs){
+          defs = document.createElementNS(SVG_NS, 'defs');
+          svg.insertBefore(defs, svg.firstChild);
+        }
+        return defs;
+      }
+
+      function setHref(el, targetId){
+        try { el.setAttribute('href', `#${targetId}`); } catch(_){}
+        try { el.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${targetId}`); } catch(_){}
+      }
+
+      // Prepare patterns for each shape
+      base.forEach((b, idx) => {
+        const svg = b.node;
+        const viewBox = svg.getAttribute('viewBox') || '0 0 144 144';
+        const vb = parseViewBox(viewBox);
+        const paintSel = '.cls-1, path, rect, polygon, circle, ellipse, polyline';
+        const geom = svg.querySelector(paintSel);
+        if (!geom) return;
+        const origFill = geom.style.fill || '';
+
+        const defs = ensureDefs(svg);
+        const shapeId = svg.getAttribute('id') || `shape-${idx}`;
+        const symbolId = `tile-${shapeId}-${uid}`;
+        const patternId = `pattern-${shapeId}-${uid}`;
+
+        // Create a symbol containing the original geometry
+        const sym = document.createElementNS(SVG_NS, 'symbol');
+        sym.setAttribute('id', symbolId);
+        sym.setAttribute('viewBox', viewBox);
+        const geomClone = geom.cloneNode(true);
+        // Ensure cloned tile uses the same fill variable
+        if (origFill) geomClone.style.fill = origFill;
+        sym.appendChild(geomClone);
+        defs.appendChild(sym);
+
+        // Pattern that repeats the mini-shape
+        const pattern = document.createElementNS(SVG_NS, 'pattern');
+        pattern.setAttribute('id', patternId);
+        pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+        // Initial tile size; will be updated in tick
+        const minDim = Math.min(vb.width, vb.height);
+        let tile = Math.max(8, minDim * 0.12);
+        pattern.setAttribute('width', String(tile));
+        pattern.setAttribute('height', String(tile));
+
+        // Place the tile geometry centered within the pattern cell
+        const use = document.createElementNS(SVG_NS, 'use');
+        setHref(use, symbolId);
+        pattern.appendChild(use);
+        defs.appendChild(pattern);
+
+        // Apply the pattern as fill
+        geom.style.fill = `url(#${patternId})`;
+
+        entries.push({ b, svg, vb, geom, origFill, defs, sym, pattern, use, minDim });
+      });
+
+      // Proximity-controlled tile scaling + gentle drift
+      let rafId = 0;
+      let pointerX = null, pointerY = null;
+      const sMin = 0.10; // 10% of original size (many tiles)
+      const sMax = 1.00; // 100% (single tile fills shape)
+      const gapMaxFrac = 0.12; // at far distance, leave ~12% gap between tiles
+      const smoothing = 0.12; // approach speed for smooth transitions
+      const influenceFrac = 0.85; // proximity reach vs viewport
+      const innerRadiusFrac = 0.45; // inner zone of full fill
+      const driftSpeed = 0.0006; // position drift speed
+      const rotSpeed = 0.06;     // rotation drift speed
+
+      // Initialize per-entry dynamic state
+      entries.forEach(e => {
+        e.s = sMin;
+        e.ox = 0; e.oy = 0; e.or = 0;
+        e.vx = (Math.random() - 0.5) * driftSpeed;
+        e.vy = (Math.random() - 0.5) * driftSpeed;
+        e.vr = (Math.random() - 0.5) * rotSpeed;
+      });
+
+      function updateEntryScale(entry, s, gapFrac){
+        const tileW = entry.vb.width * s;
+        const tileH = entry.vb.height * s;
+        const gapX = tileW * gapFrac;
+        const gapY = tileH * gapFrac;
+        entry.pattern.setAttribute('width', String(tileW + gapX));
+        entry.pattern.setAttribute('height', String(tileH + gapY));
+        const tx = -entry.vb.minX;
+        const ty = -entry.vb.minY;
+        // Center tile in the cell leaving symmetric gaps
+        entry.use.setAttribute('transform', `translate(${(gapX/2).toFixed(4)}, ${(gapY/2).toFixed(4)}) scale(${s}) translate(${tx}, ${ty})`);
+      }
+
+      function onPointerMove(e){
+        const x = ('clientX' in e) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : null);
+        const y = ('clientY' in e) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : null);
+        if (x == null || y == null) return;
+        pointerX = x; pointerY = y;
+      }
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('touchmove', onPointerMove, { passive: true });
+
+      function tick(){
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        const reach = Math.min(vw, vh) * influenceFrac; // pixels
+        const inner = reach * innerRadiusFrac;
+        entries.forEach(entry => {
+          // Update drift offsets with simple edge bounce
+          entry.ox += entry.vx; entry.oy += entry.vy; entry.or += entry.vr;
+          if (entry.b.left + entry.ox < 0.08 || entry.b.left + entry.ox > 0.92) entry.vx *= -1;
+          if (entry.b.top + entry.oy < 0.08 || entry.b.top + entry.oy > 0.92) entry.vy *= -1;
+          const left = (entry.b.left + entry.ox) * 100;
+          const top = (entry.b.top + entry.oy) * 100;
+          const rotate = entry.b.rotate + entry.or;
+          entry.svg.style.left = left + '%';
+          entry.svg.style.top = top + '%';
+          entry.svg.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${entry.b.scale})`;
+
+          // Determine proximity-driven target scale and gap
+          let targetS = sMin;
+          let gapFrac = gapMaxFrac;
+          if (pointerX != null && pointerY != null){
+            const rect = entry.svg.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = pointerX - cx;
+            const dy = pointerY - cy;
+            const d = Math.hypot(dx, dy);
+            if (d <= inner){
+              targetS = sMax;
+              gapFrac = 0;
+            } else {
+              const closeness = Math.max(0, 1 - (d - inner) / Math.max(1, reach - inner));
+              const c2 = closeness * closeness;
+              targetS = sMin + (sMax - sMin) * c2;
+              gapFrac = gapMaxFrac * (1 - c2);
+            }
+          }
+
+          // Smoothly approach target scale and apply pattern update
+          entry.s += (targetS - entry.s) * smoothing;
+          updateEntryScale(entry, entry.s, gapFrac);
+        });
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+
+      return function teardown(){
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('touchmove', onPointerMove);
+        cancelAnimationFrame(rafId);
+        // Restore original fills and remove generated defs
+        entries.forEach(entry => {
+          try { entry.geom.style.fill = entry.origFill || ''; } catch(_) {}
+          try { entry.pattern.remove(); } catch(_) {}
+          try { entry.sym.remove(); } catch(_) {}
+        });
+        applyBaseStyles(base);
+      };
     }
   };
 
