@@ -1,4 +1,14 @@
+@use "../utils/breakpoints" as *;å
+
 .statements,
 .statement {
   display: block;
+}
+
+.statement {
+  text-wrap: pretty;
+
+  @include breakpoint($m-up) {
+    max-width: 26em;
+  }
 }

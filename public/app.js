@@ -8,14 +8,20 @@
     return arr;
   }
 
-  function renderStatement(container, text){
+  function renderStatement(container, item){
     container.innerHTML = '';
     const section = document.createElement('section');
     section.className = 'statement';
-    const p = document.createElement('p');
-    p.className = 'line';
-    p.textContent = String(text);
-    section.appendChild(p);
+    const quote = document.createElement('p');
+    quote.className = 'line quote';
+    quote.textContent = String(item && item.quote ? item.quote : item);
+    section.appendChild(quote);
+    const attr = document.createElement('p');
+    attr.className = 'line attribution';
+    if (item && item.attribution) {
+      attr.textContent = String(item.attribution);
+      section.appendChild(attr);
+    }
     container.appendChild(section);
   }
 
@@ -74,20 +80,20 @@
 
     // Statements: keep existing behavior (attempt runtime JSON; fallback to server HTML)
     if (statementsContainer) {
-      function startStatementsRotation(texts){
-        if (!Array.isArray(texts) || texts.length === 0) return;
+      function startStatementsRotation(items){
+        if (!Array.isArray(items) || items.length === 0) return;
         const totalMs = 15000; // 15s per item
         const gapMs = 2000;    // 2s hidden between items
         const visibleMs = Math.max(0, totalMs - gapMs);
         let idx = 0;
         statementsContainer.style.opacity = '1';
-        renderStatement(statementsContainer, texts[idx]);
+        renderStatement(statementsContainer, items[idx]);
         (function schedule(){
           setTimeout(() => {
             statementsContainer.style.opacity = '0';
             setTimeout(() => {
-              idx = (idx + 1) % texts.length;
-              renderStatement(statementsContainer, texts[idx]);
+              idx = (idx + 1) % items.length;
+              renderStatement(statementsContainer, items[idx]);
               statementsContainer.style.opacity = '1';
               schedule();
             }, gapMs);
@@ -99,16 +105,20 @@
         .then(res => { if(!res.ok) throw new Error('no json'); return res.json(); })
         .then(json => {
           if(Array.isArray(json)){
-            const texts = shuffleArray(json.filter(item => typeof item === 'string' && item.length > 0));
-            startStatementsRotation(texts);
+            const items = shuffleArray(json.filter(item => (typeof item === 'object' && item && typeof item.quote === 'string') || typeof item === 'string'));
+            startStatementsRotation(items);
           }
         })
         .catch(() => {
           const nodes = Array.from(statementsContainer.querySelectorAll('.statement'));
           if(nodes.length > 0){
-            const texts = shuffleArray(nodes.map(node => node.textContent || '').filter(Boolean));
+            const items = shuffleArray(nodes.map(node => {
+              const q = node.querySelector('.quote');
+              const a = node.querySelector('.attribution');
+              return { quote: (q && q.textContent) || '', attribution: (a && a.textContent) || '' };
+            }).filter(o => o.quote));
             statementsContainer.innerHTML = '';
-            startStatementsRotation(texts);
+            startStatementsRotation(items);
           }
         });
     }

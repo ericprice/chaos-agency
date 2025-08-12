@@ -3,9 +3,10 @@ layout: layouts/base.njk
 title: Home
 ---
 <div id="statements" class="statements">
-  {% for text in site.statements %}
+  {% for item in site.statements %}
     <section class="statement">
-      <p class="line">{{ text }}</p>
+      <p class="line quote">{{ item.quote }}</p>
+      {% if item.attribution %}<p class="line attribution">{{ item.attribution }}</p>{% endif %}
     </section>
   {% endfor %}
   </div>
