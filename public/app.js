@@ -83,7 +83,7 @@
       function startStatementsRotation(items){
         if (!Array.isArray(items) || items.length === 0) return;
         const totalMs = 15000; // 15s per item
-        const gapMs = 2000;    // 2s hidden between items
+        const gapMs = 1000;    // 1s hidden between items
         const visibleMs = Math.max(0, totalMs - gapMs);
         let idx = 0;
         statementsContainer.style.opacity = '1';

@@ -6,7 +6,6 @@
 }
 
 .statement {
-  text-wrap: pretty;
 
   @include breakpoint($m-up) {
     max-width: 26em;
@@ -18,10 +17,15 @@
     animation: line-reveal 120ms ease-out forwards;
   }
 
-  .quote { animation-delay: 1s; }
-  .attribution { animation-delay: 2s; }
+  .quote {
+    animation-delay: .5s;
+    text-wrap: pretty;
+  }
 
   .attribution {
+    animation-delay: 1.25s;
+    white-space: nowrap;
+
     &::before {
       content: "—";
     }
