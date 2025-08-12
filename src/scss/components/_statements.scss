@@ -6,23 +6,24 @@
 }
 
 .statement {
+  text-wrap: pretty;
+
   @include breakpoint($m-up) {
-    //max-width: 48em;
+    max-width: 24em;
   }
 
-  /* Sequential inline reveal: quote then attribution */
   .quote,
   .attribution {
     opacity: 0;
-    animation: line-reveal 120ms ease-out forwards;
+    animation: line-reveal 80ms ease-out forwards;
   }
 
   .quote {
     animation-delay: 1s;
-    text-wrap: pretty;
   }
 
   .attribution {
+    display: inline-block;
     animation-delay: 2s;
     white-space: nowrap;
 
