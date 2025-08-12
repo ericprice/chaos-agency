@@ -3,15 +3,12 @@ layout: layouts/base.njk
 title: Home
 ---
 <div id="statements" class="statements">
-  {% set randomized = site.statements | shuffle %}
-  {% for statement in randomized %}
+  {% for text in site.statements %}
     <section class="statement">
-      {% if statement.length >= 1 %}<p class="line">{{ statement[0] }}</p>{% endif %}
-      {% if statement.length >= 2 %}<p class="line">{{ statement[1] }}</p>{% endif %}
-      {% if statement.length >= 3 %}<p class="line">{{ statement[2] }}</p>{% endif %}
+      <p class="line">{{ text }}</p>
     </section>
   {% endfor %}
-</div>
+  </div>
 <div id="shapes" class="shapes">
   <svg xmlns="http://www.w3.org/2000/svg" class="shape" id="octagon" data-name="Layer 1" version="1.1" viewBox="0 0 144 144"><defs><style>.cls-1{fill:#000;stroke-width:0}</style></defs><path d="M0 101.6V42.3L41.9 0h59.7L144 42.4v59.3l-42.4 42.4H41.9L0 101.6Z" class="cls-1"/></svg>
   <svg xmlns="http://www.w3.org/2000/svg" class="shape" id="square" data-name="Layer 1" version="1.1" viewBox="0 0 126.7 144"><defs><style>.cls-1{fill:#000;stroke-width:0}</style></defs><path d="M0 0h126.7v144H0V0Z" class="cls-1"/></svg>

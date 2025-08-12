@@ -8,16 +8,14 @@
     return arr;
   }
 
-  function renderStatement(container, texts){
+  function renderStatement(container, text){
     container.innerHTML = '';
     const section = document.createElement('section');
     section.className = 'statement';
-    texts.slice(0, 3).forEach(text => {
-      const p = document.createElement('p');
-      p.className = 'line';
-      p.textContent = String(text);
-      section.appendChild(p);
-    });
+    const p = document.createElement('p');
+    p.className = 'line';
+    p.textContent = String(text);
+    section.appendChild(p);
     container.appendChild(section);
   }
 
@@ -83,8 +81,7 @@
         .then(json => {
           if(Array.isArray(json)){
             loadedStatements = json
-              .filter(item => Array.isArray(item) && item.length > 0)
-              .map(item => item.slice(0, 3));
+              .filter(item => typeof item === 'string' && item.length > 0);
             loadedStatements = shuffleArray(loadedStatements);
             index = 0;
             renderStatement(statementsContainer, loadedStatements[index]);
@@ -97,7 +94,7 @@
         .catch(() => {
           const nodes = Array.from(statementsContainer.querySelectorAll('.statement'));
           if(nodes.length > 0){
-            const texts = nodes.map(node => Array.from(node.querySelectorAll('p')).map(p=>p.textContent));
+            const texts = nodes.map(node => node.textContent || '').filter(Boolean);
             loadedStatements = shuffleArray(texts);
             statementsContainer.innerHTML = '';
             index = 0;
