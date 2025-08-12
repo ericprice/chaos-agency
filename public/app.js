@@ -131,6 +131,32 @@
     if (!shapesRoot) return;
     const base = randomizeShapesBase(shapesRoot);
 
+    // Parallax configuration (runtime-editable via /parallax.json)
+    const defaultParallax = {
+      moveScale: 0.6,       // overall cursor→movement scale
+      depthBase: 0.3,       // minimum movement factor for farthest shape
+      depthRange: 0.7,      // additional movement factor scaled by depth
+      rotationScale: 40,    // rotation sensitivity
+      invertX: false,       // flip X direction
+      invertY: false        // flip Y direction
+    };
+    let parallaxCfg = { ...defaultParallax };
+    fetch('/parallax.json?ts=' + Date.now(), { cache: 'no-store' })
+      .then(res => res.ok ? res.json() : null)
+      .then(cfg => {
+        if (cfg && typeof cfg === 'object'){
+          parallaxCfg = {
+            moveScale: Number(cfg.moveScale) || defaultParallax.moveScale,
+            depthBase: Number(cfg.depthBase) || defaultParallax.depthBase,
+            depthRange: Number(cfg.depthRange) || defaultParallax.depthRange,
+            rotationScale: Number(cfg.rotationScale) || defaultParallax.rotationScale,
+            invertX: Boolean(cfg.invertX),
+            invertY: Boolean(cfg.invertY)
+          };
+        }
+      })
+      .catch(()=>{});
+
     let targetX = 0.5, targetY = 0.5;
     function onPointerMove(e){
       const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -146,12 +172,15 @@
     let rafId = 0;
     function tick(){
       base.forEach((b, i) => {
-        const dx = (targetX - 0.5) * 0.6;
-        const dy = (targetY - 0.5) * 0.6;
-        const parallax = (i + 1) / (base.length + 1);
-        const left = (b.left + dx * (0.3 + parallax * 0.7));
-        const top = (b.top + dy * (0.3 + parallax * 0.7));
-        const rot = b.rotate + (dx - dy) * 40 * (parallax);
+        const invX = parallaxCfg.invertX ? -1 : 1;
+        const invY = parallaxCfg.invertY ? -1 : 1;
+        const dx = (targetX - 0.5) * parallaxCfg.moveScale * invX;
+        const dy = (targetY - 0.5) * parallaxCfg.moveScale * invY;
+        const depth = (i + 1) / (base.length + 1);
+        const factor = parallaxCfg.depthBase + depth * parallaxCfg.depthRange;
+        const left = (b.left + dx * factor);
+        const top = (b.top + dy * factor);
+        const rot = b.rotate + (dx - dy) * parallaxCfg.rotationScale * depth;
         b.node.style.left = (left * 100) + '%';
         b.node.style.top = (top * 100) + '%';
         b.node.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${b.scale})`;
