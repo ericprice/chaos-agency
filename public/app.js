@@ -12,16 +12,20 @@
     container.innerHTML = '';
     const section = document.createElement('section');
     section.className = 'statement';
-    const quote = document.createElement('p');
-    quote.className = 'line quote';
+    const p = document.createElement('p');
+    const quote = document.createElement('span');
+    quote.className = 'quote';
     quote.textContent = String(item && item.quote ? item.quote : item);
-    section.appendChild(quote);
-    const attr = document.createElement('p');
-    attr.className = 'line attribution';
+    p.appendChild(quote);
     if (item && item.attribution) {
+      const space = document.createTextNode(' ');
+      p.appendChild(space);
+      const attr = document.createElement('span');
+      attr.className = 'attribution';
       attr.textContent = String(item.attribution);
-      section.appendChild(attr);
+      p.appendChild(attr);
     }
+    section.appendChild(p);
     container.appendChild(section);
   }
 

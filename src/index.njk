@@ -5,8 +5,7 @@ title: Home
 <div id="statements" class="statements">
   {% for item in site.statements %}
     <section class="statement">
-      <p class="line quote">{{ item.quote }}</p>
-      {% if item.attribution %}<p class="line attribution">{{ item.attribution }}</p>{% endif %}
+      <p><span class="quote">{{ item.quote }}</span> {% if item.attribution %}<span class="attribution">{{ item.attribution }}</span>{% endif %}</p>
     </section>
   {% endfor %}
   </div>

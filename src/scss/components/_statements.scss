@@ -6,13 +6,12 @@
 }
 
 .statement {
-
   @include breakpoint($m-up) {
-    max-width: 26em;
+    //max-width: 48em;
   }
 
   /* Sequential line reveal: quote at 1s, attribution at 2s */
-  .line {
+  p {
     opacity: 0;
     animation: line-reveal 120ms ease-out forwards;
   }
