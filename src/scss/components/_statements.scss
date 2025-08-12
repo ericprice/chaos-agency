@@ -10,19 +10,20 @@
     //max-width: 48em;
   }
 
-  /* Sequential line reveal: quote at 1s, attribution at 2s */
-  p {
+  /* Sequential inline reveal: quote then attribution */
+  .quote,
+  .attribution {
     opacity: 0;
     animation: line-reveal 120ms ease-out forwards;
   }
 
   .quote {
-    animation-delay: .5s;
+    animation-delay: 1s;
     text-wrap: pretty;
   }
 
   .attribution {
-    animation-delay: 1.25s;
+    animation-delay: 2s;
     white-space: nowrap;
 
     &::before {
