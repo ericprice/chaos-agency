@@ -74,35 +74,41 @@
 
     // Statements: keep existing behavior (attempt runtime JSON; fallback to server HTML)
     if (statementsContainer) {
-      let loadedStatements = null;
-      let index = 0;
+      function startStatementsRotation(texts){
+        if (!Array.isArray(texts) || texts.length === 0) return;
+        const totalMs = 15000; // 15s per item
+        const gapMs = 2000;    // 2s hidden between items
+        const visibleMs = Math.max(0, totalMs - gapMs);
+        let idx = 0;
+        statementsContainer.style.opacity = '1';
+        renderStatement(statementsContainer, texts[idx]);
+        (function schedule(){
+          setTimeout(() => {
+            statementsContainer.style.opacity = '0';
+            setTimeout(() => {
+              idx = (idx + 1) % texts.length;
+              renderStatement(statementsContainer, texts[idx]);
+              statementsContainer.style.opacity = '1';
+              schedule();
+            }, gapMs);
+          }, visibleMs);
+        })();
+      }
+
       fetch('/statements.json?ts=' + Date.now(), { cache: 'no-store' })
         .then(res => { if(!res.ok) throw new Error('no json'); return res.json(); })
         .then(json => {
           if(Array.isArray(json)){
-            loadedStatements = json
-              .filter(item => typeof item === 'string' && item.length > 0);
-            loadedStatements = shuffleArray(loadedStatements);
-            index = 0;
-            renderStatement(statementsContainer, loadedStatements[index]);
-            setInterval(() => {
-              index = (index + 1) % loadedStatements.length;
-              renderStatement(statementsContainer, loadedStatements[index]);
-            }, 30000);
+            const texts = shuffleArray(json.filter(item => typeof item === 'string' && item.length > 0));
+            startStatementsRotation(texts);
           }
         })
         .catch(() => {
           const nodes = Array.from(statementsContainer.querySelectorAll('.statement'));
           if(nodes.length > 0){
-            const texts = nodes.map(node => node.textContent || '').filter(Boolean);
-            loadedStatements = shuffleArray(texts);
+            const texts = shuffleArray(nodes.map(node => node.textContent || '').filter(Boolean));
             statementsContainer.innerHTML = '';
-            index = 0;
-            renderStatement(statementsContainer, loadedStatements[index]);
-            setInterval(() => {
-              index = (index + 1) % loadedStatements.length;
-              renderStatement(statementsContainer, loadedStatements[index]);
-            }, 30000);
+            startStatementsRotation(texts);
           }
         });
     }
