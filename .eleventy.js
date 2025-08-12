@@ -7,8 +7,13 @@ module.exports = function(eleventyConfig) {
       .sort((a, b) => a.sortKey - b.sortKey)
       .map((entry) => entry.value);
   });
-  eleventyConfig.addPassthroughCopy({ "public": "/" });
-  eleventyConfig.addPassthroughCopy("public/statements.json");
+
+  // Copy everything in `public/` to the output root (e.g. dist/)
+  eleventyConfig.addPassthroughCopy({ "public": "." });
+
+  // Watch public assets in dev
+  eleventyConfig.addWatchTarget("public/");
+
   return {
     dir: {
       input: "src",
