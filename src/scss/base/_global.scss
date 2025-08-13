@@ -19,6 +19,7 @@ $orange: #ffa600 !default;
   --orange: #{$orange};
   --gap: 1.2em;
   --leading: 1.2em;
+  --shape-color: var(--black);
 }
 
 html {
@@ -37,6 +38,16 @@ body {
   font-size: 1rem;
   line-height: var(--leading);
   font-feature-settings: "liga" 1;
+}
+
+/* Make text selection background match current shape color */
+::selection {
+  background: var(--shape-color);
+  color: var(--bg);
+}
+::-moz-selection {
+  background: var(--shape-color);
+  color: var(--bg);
 }
 
 a {

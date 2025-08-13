@@ -41,6 +41,10 @@
         el.style.fill = `var(${chosenVar})`;
       });
     });
+    // Sync selection color to current shape color
+    try {
+      document.documentElement.style.setProperty('--shape-color', `var(${chosenVar})`);
+    } catch(_) {}
 
     // Randomize order and place shapes
     const shuffledNodes = (arr => arr.map(v=>({v, r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.v))([...nodes]);
