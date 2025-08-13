@@ -228,8 +228,6 @@
     window.addEventListener('touchend', onPointerUp, { passive: true });
     window.addEventListener('touchcancel', onPointerUp, { passive: true });
 
-    // Remove gyro/accelerometer support; pointer/touch only
-
     let rafId = 0;
     function tick(){
       base.forEach((b, i) => {
@@ -248,7 +246,6 @@
         b.node.style.top = (top * 100) + '%';
         b.node.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${b.scale})`;
       });
-      // Idle fade logic
       const now = performance.now();
       const idleMs = now - lastMoveAt;
       if (idleMs >= idleThresholdMs){
