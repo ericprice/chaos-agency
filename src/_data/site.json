@@ -4,9 +4,21 @@
   "description": "CHAOS Agency",
   "url": "https://chaosagency.art",
   "statements": [
-    { "quote": "diffusion of authority, diffusion of authorship, diffusion of agency", "attribution": "" },
-    { "quote": "network supported revolutions", "attribution": "" },
-    { "quote": "value (v.) network, value (v.) conversation, value (v.) experimentation", "attribution": "" },
-    { "quote": "proof of work, proof of stake, proof of agency", "attribution": "" }
+    {
+      "quote": "When you want something, the whole universe conspires in order for you to achieve it.",
+      "attribution": "Paulo Coelho"
+    },
+    {
+      "quote": "A woman must continually watch herself. She is almost continually accompanied by her own image of herself.",
+      "attribution": "John Berger"
+    },
+    {
+      "quote": "The history of art deals with innovators and innovations that won organizational victories.",
+      "attribution": "Howard Becker"
+    },
+    {
+      "quote": "Works work when they inform vision; inform not by supplying information but by forming or reforming or transforming vision.",
+      "attribution": "Nelson Goodman"
+    }
   ]
 }
