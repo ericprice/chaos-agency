@@ -180,7 +180,7 @@
     let targetX = 0.5, targetY = 0.5;
     // Idle fade config
     let lastMoveAt = performance.now();
-    const idleThresholdMs = 5000;  // start fading after 5s idle
+    const idleThresholdMs = 180000;  // start fading after 3 minutes idle
     const fadeDurationMs = 20000;  // fade to 0 over 20s
     function onPointerMove(e){
       const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
