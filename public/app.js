@@ -84,10 +84,10 @@
 
     // Statements: keep existing behavior (attempt runtime JSON; fallback to server HTML)
     if (statementsContainer) {
-      function startStatementsRotation(items){
+      function startStatementsRotation(items, options){
         if (!Array.isArray(items) || items.length === 0) return;
-        const totalMs = 15000; // 15s per item
-        const gapMs = 1000;    // 1s hidden between items
+        const totalMs = Math.max(1000, Number(options && options.cycleMs) || 15000);
+        const gapMs = Math.max(0, Number(options && options.gapMs) || 1000);
         const visibleMs = Math.max(0, totalMs - gapMs);
         let idx = 0;
         statementsContainer.style.opacity = '1';
@@ -108,9 +108,14 @@
       fetch('/statements.json?ts=' + Date.now(), { cache: 'no-store' })
         .then(res => { if(!res.ok) throw new Error('no json'); return res.json(); })
         .then(json => {
-          if(Array.isArray(json)){
+          if (Array.isArray(json)){
             const items = shuffleArray(json.filter(item => (typeof item === 'object' && item && typeof item.quote === 'string') || typeof item === 'string'));
             startStatementsRotation(items);
+          } else if (json && typeof json === 'object'){
+            const cfg = { cycleMs: json.cycleMs, gapMs: json.gapMs };
+            const raw = Array.isArray(json.items) ? json.items : [];
+            const items = shuffleArray(raw.filter(item => (typeof item === 'object' && item && typeof item.quote === 'string') || typeof item === 'string'));
+            startStatementsRotation(items, cfg);
           }
         })
         .catch(() => {
