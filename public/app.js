@@ -178,6 +178,10 @@
       .catch(()=>{});
 
     let targetX = 0.5, targetY = 0.5;
+    // Idle fade config
+    let lastMoveAt = performance.now();
+    const idleThresholdMs = 5000;  // start fading after 5s idle
+    const fadeDurationMs = 20000;  // fade to 0 over 20s
     function onPointerMove(e){
       const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
       const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
@@ -185,6 +189,8 @@
       const y = ('clientY' in e) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : vh/2);
       targetX = x / vw;
       targetY = y / vh;
+      lastMoveAt = performance.now();
+      if (shapesRoot.style.opacity !== '1') shapesRoot.style.opacity = '1';
     }
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('touchmove', onPointerMove, { passive: true });
@@ -205,6 +211,14 @@
         b.node.style.top = (top * 100) + '%';
         b.node.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${b.scale})`;
       });
+      // Idle fade logic
+      const now = performance.now();
+      const idleMs = now - lastMoveAt;
+      if (idleMs >= idleThresholdMs){
+        const t = Math.min((idleMs - idleThresholdMs) / fadeDurationMs, 1);
+        const nextOpacity = 1 - t;
+        shapesRoot.style.opacity = String(nextOpacity);
+      }
       rafId = requestAnimationFrame(tick);
     }
     rafId = requestAnimationFrame(tick);
