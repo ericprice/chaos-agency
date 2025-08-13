@@ -81,6 +81,21 @@
   document.addEventListener('DOMContentLoaded', function(){
     const statementsContainer = document.getElementById('statements');
     const shapesRoot = document.getElementById('shapes');
+    const footerEmail = document.querySelector('.site-footer-email');
+
+    // Footer contact info (runtime-editable via /contact.json)
+    if (footerEmail) {
+      fetch('/contact.json?ts=' + Date.now(), { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : null)
+        .then(json => {
+          if (!json || typeof json !== 'object') return;
+          const email = typeof json.email === 'string' ? json.email : null;
+          const label = typeof json.label === 'string' ? json.label : (email || null);
+          if (email) footerEmail.setAttribute('href', 'mailto:' + email);
+          if (label) footerEmail.textContent = label;
+        })
+        .catch(() => {});
+    }
 
     // Statements: keep existing behavior (attempt runtime JSON; fallback to server HTML)
     if (statementsContainer) {
