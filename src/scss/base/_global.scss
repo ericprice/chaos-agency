@@ -22,6 +22,11 @@ $orange: #ffa600 !default;
   --shape-color: var(--black);
 }
 
+body,
+html {
+  overflow: hidden;
+}
+
 html {
   font-size: 16px;
 
@@ -40,7 +45,6 @@ body {
   font-feature-settings: "liga" 1;
 }
 
-/* Make text selection background match current shape color */
 ::selection {
   background: var(--shape-color);
   color: var(--bg);
