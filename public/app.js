@@ -182,6 +182,9 @@
       .catch(()=>{});
 
     let targetX = 0.5, targetY = 0.5;
+    // Touch drag baseline so shapes don't jump at drag start
+    let isDragActive = false;
+    let dragStartX = 0.5, dragStartY = 0.5;
     // Idle fade config
     let lastMoveAt = performance.now();
     const idleThresholdMs = 180000;  // start fading after 3 minutes idle
@@ -196,16 +199,46 @@
       lastMoveAt = performance.now();
       if (shapesRoot.style.opacity !== '1') shapesRoot.style.opacity = '1';
     }
+    function onPointerDown(e){
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      const x = ('clientX' in e) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : vw/2);
+      const y = ('clientY' in e) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : vh/2);
+      targetX = x / vw;
+      targetY = y / vh;
+      // Only treat touch interactions as drags for baseline handling
+      if ((e.pointerType && e.pointerType === 'touch') || (e.touches && e.touches.length > 0)){
+        isDragActive = true;
+        dragStartX = targetX;
+        dragStartY = targetY;
+      }
+      lastMoveAt = performance.now();
+    }
+    function onPointerUp(e){
+      if ((e.pointerType && e.pointerType === 'touch') || e.type === 'touchend' || e.type === 'touchcancel'){
+        isDragActive = false;
+      }
+    }
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('pointerdown', onPointerDown, { passive: true });
+    window.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
+    window.addEventListener('pointercancel', onPointerUp, { passive: true });
+    window.addEventListener('touchend', onPointerUp, { passive: true });
+    window.addEventListener('touchcancel', onPointerUp, { passive: true });
+
+    // Remove gyro/accelerometer support; pointer/touch only
 
     let rafId = 0;
     function tick(){
       base.forEach((b, i) => {
         const invX = parallaxCfg.invertX ? -1 : 1;
         const invY = parallaxCfg.invertY ? -1 : 1;
-        const dx = (targetX - 0.5) * parallaxCfg.moveScale * invX;
-        const dy = (targetY - 0.5) * parallaxCfg.moveScale * invY;
+        const baseDx = (isDragActive ? (targetX - dragStartX) : (targetX - 0.5));
+        const baseDy = (isDragActive ? (targetY - dragStartY) : (targetY - 0.5));
+        const dx = baseDx * parallaxCfg.moveScale * invX;
+        const dy = baseDy * parallaxCfg.moveScale * invY;
         const depth = (i + 1) / (base.length + 1);
         const factor = parallaxCfg.depthBase + depth * parallaxCfg.depthRange;
         const left = (b.left + dx * factor);
