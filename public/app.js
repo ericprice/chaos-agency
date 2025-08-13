@@ -90,14 +90,15 @@
         .then(json => {
           if (!json || typeof json !== 'object') return;
           const email = typeof json.email === 'string' ? json.email : null;
-          const label = typeof json.label === 'string' ? json.label : (email || null);
-          if (email) footerEmail.setAttribute('href', 'mailto:' + email);
-          if (label) footerEmail.textContent = label;
+          if (email) {
+            footerEmail.setAttribute('href', 'mailto:' + email);
+            footerEmail.textContent = email;
+          }
         })
         .catch(() => {});
     }
 
-    // Statements: keep existing behavior (attempt runtime JSON; fallback to server HTML)
+    // Statements (attempt runtime JSON; fallback to server HTML)
     if (statementsContainer) {
       function startStatementsRotation(items, options){
         if (!Array.isArray(items) || items.length === 0) return;
@@ -147,7 +148,6 @@
         });
     }
 
-    // Shapes: parallax only
     if (!shapesRoot) return;
     const base = randomizeShapesBase(shapesRoot);
 
@@ -208,8 +208,6 @@
       rafId = requestAnimationFrame(tick);
     }
     rafId = requestAnimationFrame(tick);
-
-    // No teardown management needed since this is the only mode on main
   });
 })();
 
