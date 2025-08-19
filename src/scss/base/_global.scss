@@ -76,7 +76,13 @@ a {
   }
 
   .site-header-title {
-    margin-bottom: var(--leading);
+    text-indent: -99999px;
+    overflow: hidden;
+    width: 100%;
+    height: 1.2em;
+    margin-top: .125em;
+    background: url("./images/logo.png") no-repeat top left;
+    background-size: contain;
   }
 }
 

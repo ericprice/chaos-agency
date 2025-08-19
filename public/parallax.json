@@ -1,8 +1,8 @@
 {
-  "moveScale": 0.6,
+  "moveScale": 0.9,
   "depthBase": 0.3,
-  "depthRange": 0.7,
-  "rotationScale": 40,
+  "depthRange": 1.5,
+  "rotationScale": 200,
   "invertX": false,
   "invertY": false
 }

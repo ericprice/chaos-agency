@@ -22,4 +22,3 @@ The site supports updating a few behaviors at runtime via JSON files in `public/
 3) `public/contact.json`
    - Controls the footer email link:
      - `{ "email": "user@example.com" }`
-   - The same value is used for both the link label and `mailto:` href.

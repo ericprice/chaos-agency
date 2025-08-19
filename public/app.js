@@ -96,7 +96,6 @@
           const email = typeof json.email === 'string' ? json.email : null;
           if (email) {
             footerEmail.setAttribute('href', 'mailto:' + email);
-            footerEmail.textContent = email;
           }
         })
         .catch(() => {});
